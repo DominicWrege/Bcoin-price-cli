@@ -54,12 +54,17 @@ fn main() {
     let user_agent = "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:56.0) Gecko/20100101 Firefox/56.0";
     let url = "https://api.coinmarketcap.com/v1/ticker/bitcoin/";
     let client = Client::new().unwrap();
-    let mut response = client
-        .get(url)
+
+    let mut response = match client.get(url)
         .unwrap()
         .header(UserAgent::new(user_agent))
-        .send()
-        .unwrap();
+        .send(){
+            Ok(resp) => resp,
+            Err(_) => { 
+                println!("Maybe your are offline?!");
+                return;
+            }
+        };
 
     match response.status() {
         StatusCode::Ok => {
