@@ -1,0 +1,65 @@
+extern crate reqwest;
+extern crate time;
+
+use reqwest::{Client, StatusCode};
+use reqwest::header::UserAgent;
+
+#[macro_use]
+extern crate serde_derive;
+
+
+#[derive(Serialize, Deserialize, Debug)]
+struct Bitcoin {
+    id: String,
+    name: String,
+    symbol: String,
+    rank: String,
+    price_usd: String,
+    price_btc: String,
+    market_cap_usd: String,
+    available_supply: String,
+    max_supply: String,
+    percent_change_1h: String,
+    percent_change_24h: String,
+    percent_change_7d: String,
+    last_updated: String,
+}
+
+impl Bitcoin {
+    fn print_result(&self) {
+        println!("{} price ${}", self.name, self.price_usd);
+        let parsded_time = time::strptime(&self.last_updated, "%s").unwrap();
+        println!(
+            "Last updated at: {}",
+            time::strftime("%H:%M", &parsded_time).unwrap()
+        );
+        let percent_change: f64 = self.percent_change_1h.parse().unwrap();
+        println!(
+            "{}% {} in last hour",
+            percent_change,
+            if percent_change < 0.0 { "down" } else if percent_change > 0.0 { "up" } else {" unchanged"}
+        );
+
+    }
+}
+
+
+fn main() {
+    let user_agent = "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:56.0) Gecko/20100101 Firefox/56.0";
+    let url = "https://api.coinmarketcap.com/v1/ticker/bitcoin/";
+    let client = Client::new().unwrap();
+    let mut response = client
+        .get(url)
+        .unwrap()
+        .header(UserAgent::new(user_agent))
+        .send()
+        .unwrap();
+
+    match response.status() {
+        StatusCode::Ok => {
+            let bitc: Vec<Bitcoin> = response.json().unwrap();
+            bitc[0].print_result();
+        }
+        _ => println!("Network issues!"),
+    }
+}
