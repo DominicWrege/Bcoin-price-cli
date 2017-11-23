@@ -33,9 +33,9 @@ impl Bitcoin {
             "Last updated at {}",
             time::strftime("%H:%M", &parsded_time).unwrap()
         );
-        let percent_change: f64 = self.percent_change_1h.parse().unwrap();
+        let percent_change: f64 = self.percent_change_24h.parse().unwrap();
         println!(
-            "{}% {} in last hour",
+            "{}% {} in last 24h",
             percent_change,
             if percent_change < 0.0 {
                 "down"
